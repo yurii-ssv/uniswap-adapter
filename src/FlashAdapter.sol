@@ -56,6 +56,16 @@ contract FlashAdapter is IUniswapV3FlashCallback, IFlashAdapter {
         delete ctx;
     }
 
+    function execute(Call[] calldata calls) onlyOwner external {
+        for (uint256 i = 0; i < calls.length; i++) {
+            (bool ok, bytes memory result) =
+                                        calls[i].target.call{value: calls[i].value}(calls[i].callData);
+            if (!ok) {
+                revert CallFailed(result);
+            }
+        }
+    }
+
     function uniswapV3FlashCallback(
         uint256 fee0,
         uint256 fee1,

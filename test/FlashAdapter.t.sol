@@ -78,6 +78,33 @@ contract FlashAdapterTest is Test {
         adapter.flash(address(0), 0, 0, calls);
     }
 
+    function testExecuteTriggersExpectedCalls() public {
+        calls.push(IFlashAdapter.Call({
+            target: address(target),
+            value: 0,
+            callData: abi.encodeWithSelector(Target.foo.selector)
+        }));
+
+        calls.push(IFlashAdapter.Call({
+            target: address(target),
+            value: 0,
+            callData: abi.encodeWithSelector(Target.bar.selector)
+        }));
+
+        vm.expectCall(
+            address(target),
+            abi.encodeWithSelector(Target.foo.selector)
+        );
+
+        vm.expectCall(
+            address(target),
+            abi.encodeWithSelector(Target.bar.selector)
+        );
+
+        vm.prank(owner);
+        adapter.execute(calls);
+    }
+
 }
 
 contract Target {
